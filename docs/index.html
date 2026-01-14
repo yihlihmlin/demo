@@ -1,0 +1,2040 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>供應鏈事件影響評估 - 多頁簽 Prototype（完整版）</title>
+
+  <style>
+    /* =========================
+       Light + Soft Blue Gradient Business Dashboard
+       ========================= */
+    :root{
+      --bg:#f6f9ff;
+      --bg2:#eef5ff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#5b6b85;
+
+      --line:#e4ebf6;
+      --line2:#d7e2f3;
+
+      --chip:#eef5ff;
+      --chip2:#f2f6ff;
+
+      --accent:#2563eb;
+      --accent2:#60a5fa;
+
+      --danger:#dc2626;
+      --warn:#d97706;
+      --ok:#16a34a;
+
+      --shadow: 0 10px 28px rgba(15,23,42,.08);
+      --shadow2: 0 18px 50px rgba(15,23,42,.10);
+
+      --radius:18px;
+      --radius2:22px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans TC", Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+
+      --focus: 0 0 0 4px rgba(37,99,235,.15);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(900px 460px at 12% 2%, rgba(96,165,250,.22) 0%, rgba(96,165,250,0) 52%),
+        radial-gradient(780px 420px at 85% 12%, rgba(37,99,235,.16) 0%, rgba(37,99,235,0) 56%),
+        linear-gradient(180deg, var(--bg2) 0%, var(--bg) 40%, #ffffff 100%);
+    }
+
+    /* Top App Bar */
+    header.appbar{
+      padding:16px 22px 10px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:
+        linear-gradient(180deg, rgba(246,249,255,.96) 0%, rgba(246,249,255,.82) 70%, rgba(246,249,255,0) 100%);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(228,235,246,.6);
+    }
+
+    .title-row{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width: 280px;
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .dot{
+      width:10px; height:10px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, var(--accent2), var(--accent));
+      box-shadow: 0 0 0 5px rgba(37,99,235,.10);
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size:12.5px;
+      line-height:1.5;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+      font-size:12px;
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .btn:hover{
+      border-color: var(--line2);
+      box-shadow: 0 14px 34px rgba(15,23,42,.10);
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary{ box-shadow:none; background:transparent; }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; }
+
+    /* Tabs (button) */
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      padding-top:10px;
+      border-top: 1px solid rgba(228,235,246,.8);
+    }
+    .tab{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:12px;
+      box-shadow: var(--shadow);
+      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+    }
+    .tab:hover{ border-color: var(--line2); box-shadow: 0 14px 34px rgba(15,23,42,.10); }
+    .tab:active{ transform: translateY(1px); }
+    .tab[aria-selected="true"]{
+      border-color: rgba(37,99,235,.35);
+      box-shadow: 0 16px 40px rgba(37,99,235,.12);
+      background: linear-gradient(180deg, rgba(96,165,250,.14) 0%, #ffffff 70%);
+    }
+    .tab .pillDot{
+      width:8px; height:8px; border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, var(--accent2), var(--accent));
+    }
+
+    main{ padding:14px 22px 44px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:14px;
+    }
+    @media (max-width: 1080px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.90) 100%);
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card header{
+      position:unset;
+      padding:14px 14px 10px;
+      background:
+        radial-gradient(560px 140px at 0% 0%, rgba(96,165,250,.14) 0%, rgba(96,165,250,0) 60%),
+        linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.92) 100%);
+      border-bottom:1px solid var(--line);
+    }
+
+    .card h2{
+      margin:0;
+      font-size:13px;
+      letter-spacing:.25px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .badge-soft{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:#1e3a8a;
+      background: rgba(37,99,235,.06);
+      font-family: var(--mono);
+    }
+
+    .card-body{ padding:12px 14px 14px; }
+
+    .filters{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 680px){
+      .filters{ grid-template-columns: 1fr; }
+    }
+
+    .field label{
+      display:block;
+      font-size:11.5px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    .field input, .field select, .field textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      color:var(--text);
+      outline:none;
+      transition: box-shadow .12s ease, border-color .12s ease;
+      font-family: var(--sans);
+      font-size:12.5px;
+    }
+    .field textarea{ min-height: 110px; resize: vertical; line-height: 1.55; }
+    .field input:focus, .field select:focus, .field textarea:focus{
+      border-color: rgba(37,99,235,.35);
+      box-shadow: var(--focus);
+    }
+    .field input::placeholder, .field textarea::placeholder{ color:#8aa0c2; }
+
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:11.5px;
+      line-height:1.55;
+    }
+    .mono{ font-family: var(--mono); }
+
+    /* KPI */
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 900px){
+      .kpis{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi{
+      padding:12px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:
+        radial-gradient(520px 220px at 10% 0%, rgba(96,165,250,.18) 0%, rgba(96,165,250,0) 50%),
+        linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .kpi .label{ color:var(--muted); font-size:11.5px; }
+    .kpi .value{
+      font-size:20px;
+      font-weight:800;
+      margin-top:6px;
+      letter-spacing:.2px;
+    }
+    .kpi .subv{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:11.5px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .spark{
+      height:10px;
+      width:70px;
+      border-radius:999px;
+      background: rgba(37,99,235,.10);
+      border: 1px solid var(--line);
+      overflow:hidden;
+    }
+    .spark i{
+      display:block;
+      height:100%;
+      width:40%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+    }
+
+    /* Table */
+    .table-wrap{
+      overflow:auto;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#ffffff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width: 1100px;
+      background:#ffffff;
+    }
+
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      font-size:12.5px;
+      vertical-align:top;
+    }
+
+    th{
+      position:sticky;
+      top:0;
+      background:
+        radial-gradient(700px 220px at 0% 0%, rgba(96,165,250,.16) 0%, rgba(96,165,250,0) 60%),
+        linear-gradient(180deg, #f7faff 0%, #f2f7ff 100%);
+      z-index:1;
+      color:#0f172a;
+      text-align:left;
+      cursor:pointer;
+      user-select:none;
+      font-weight:700;
+      border-bottom:1px solid var(--line2);
+    }
+
+    th .sort{ color:#6f83ad; font-size:11px; margin-left:6px; }
+
+    tr:hover td{
+      background: rgba(37,99,235,.05);
+    }
+
+    .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+
+    .chip{
+      padding:4px 8px;
+      border-radius:999px;
+      background: var(--chip);
+      border:1px solid var(--line);
+      color:#1e3a8a;
+      font-size:11.5px;
+      white-space:nowrap;
+    }
+    .chip.type{
+      background: var(--chip2);
+      color:#312e81;
+    }
+
+    .score{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-family:var(--mono);
+      white-space:nowrap;
+    }
+
+    .bar{
+      width:54px;
+      height:10px;
+      border-radius:999px;
+      background: rgba(37,99,235,.10);
+      border:1px solid var(--line);
+      overflow:hidden;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:var(--mono);
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: #f8fbff;
+    }
+    .pill.ok{ color: var(--ok); }
+    .pill.warn{ color: var(--warn); }
+    .pill.danger{ color: var(--danger); }
+
+    .actions{ display:flex; gap:10px; }
+    .link{
+      color: #1d4ed8;
+      text-decoration: underline;
+      cursor:pointer;
+      font-size:12.5px;
+      font-weight:650;
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(15,23,42,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+
+    .modal{
+      width:min(980px, 100%);
+      background:
+        radial-gradient(900px 280px at 10% 0%, rgba(96,165,250,.18) 0%, rgba(96,165,250,0) 55%),
+        linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.94) 100%);
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+
+    .modal header{
+      position:unset;
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.92) 100%);
+    }
+
+    .modal .modal-body{
+      padding:14px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:12px;
+    }
+    @media (max-width: 900px){
+      .modal .modal-body{ grid-template-columns:1fr; }
+    }
+
+    .section{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:
+        radial-gradient(680px 220px at 10% 0%, rgba(96,165,250,.14) 0%, rgba(96,165,250,0) 55%),
+        #ffffff;
+      padding:12px;
+    }
+
+    .section h3{
+      margin:0 0 10px;
+      font-size:12.5px;
+      color:#0f172a;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .section h3 .num{
+      width:18px; height:18px; border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:11px; font-family:var(--mono);
+      border:1px solid var(--line);
+      background: rgba(37,99,235,.06);
+      color:#1e3a8a;
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap:8px 10px;
+      font-size:12.5px;
+    }
+    .kv .k{ color:var(--muted); }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .item{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .item .top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+
+    .item .name{ font-weight:800; }
+    .item .meta{ color:var(--muted); font-size:11.5px; margin-top:4px; line-height:1.45; }
+
+    .muted{ color:var(--muted); }
+
+    .xbtn{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:14px;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+    }
+    .xbtn:hover{ box-shadow: 0 14px 34px rgba(15,23,42,.10); }
+
+    .badge{
+      font-size:11.5px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(37,99,235,.06);
+      color:#1e3a8a;
+      font-family:var(--mono);
+      white-space:nowrap;
+    }
+
+    /* Pages */
+    .page{ display:none; }
+    .page.active{ display:block; }
+
+    /* Supply chain viz */
+    .vizWrap{
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #ffffff;
+      overflow:hidden;
+    }
+    .vizBar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:end;
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      background:
+        radial-gradient(560px 140px at 0% 0%, rgba(96,165,250,.14) 0%, rgba(96,165,250,0) 60%),
+        linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.92) 100%);
+    }
+    .vizCanvas{
+      width:100%;
+      height:420px;
+      display:block;
+      background:
+        radial-gradient(700px 300px at 15% 10%, rgba(96,165,250,.18) 0%, rgba(96,165,250,0) 55%),
+        #ffffff;
+    }
+    .node{
+      cursor:pointer;
+      transition: transform .08s ease;
+    }
+    .node:hover{ filter: drop-shadow(0 10px 18px rgba(15,23,42,.12)); }
+    .node text{
+      font-size:12px;
+      fill:#0f172a;
+      pointer-events:none;
+    }
+    .node .sub{
+      font-size:10.5px;
+      fill:#5b6b85;
+    }
+    .edge{
+      stroke: rgba(37,99,235,.35);
+      stroke-width: 2;
+    }
+    .edgeLabel{
+      fill:#5b6b85;
+      font-size:10.5px;
+    }
+    .nodeCircle{
+      stroke: rgba(37,99,235,.35);
+      stroke-width: 2;
+      fill: rgba(37,99,235,.08);
+    }
+    .nodeCircle.hl{
+      fill: rgba(37,99,235,.16);
+      stroke: rgba(37,99,235,.55);
+    }
+
+    .nowrap{ white-space:nowrap; }
+  </style>
+</head>
+
+<body>
+<header class="appbar">
+  <div class="title-row">
+    <div class="title">
+      <h1><span class="dot"></span>供應鏈事件影響評估（Prototype）</h1>
+      <div class="sub">事件擷取 → 影響推論（上中下游）→ CRM/文件對應 → 產業鏈視覺化 → AI 評估建議</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn" id="btnExport" type="button">匯出 CSV（事件表）</button>
+      <button class="btn secondary" id="btnReset" type="button">重設篩選</button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="功能頁簽">
+    <button class="tab" type="button" role="tab" id="tab-overview" aria-selected="true" data-page="overview">
+      <span class="pillDot"></span>事件總覽
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-docs" aria-selected="false" data-page="docs">
+      <span class="pillDot"></span>文檔上傳分析
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-viz" aria-selected="false" data-page="viz">
+      <span class="pillDot"></span>產業鏈視覺化 & AI 評估
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- =====================
+       Page 1: Overview
+       ===================== -->
+  <section class="page active" id="page-overview">
+    <div class="grid">
+      <!-- Filters -->
+      <section class="card">
+        <header>
+          <h2>篩選與搜尋 <span class="badge-soft">filters</span></h2>
+        </header>
+        <div class="card-body">
+          <div class="filters">
+            <div class="field">
+              <label>關鍵字（標題/摘要/公司/物料/產業/客戶）</label>
+              <input id="q" placeholder="例如：地震、罷工、晶圓、法規、電池召回…" />
+            </div>
+
+            <div class="field">
+              <label>事件類型</label>
+              <select id="eventType">
+                <option value="">全部</option>
+                <option>天災</option>
+                <option>政策/法規</option>
+                <option>罷工/停工</option>
+                <option>召回/品質</option>
+                <option>地緣政治</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>供應鏈層級（最大影響所在段）</label>
+              <select id="chainLevel">
+                <option value="">全部</option>
+                <option value="up">上游</option>
+                <option value="mid">中游</option>
+                <option value="down">下游</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>影響門檻（max 上/中/下游）≥</label>
+              <select id="impactMin">
+                <option value="0">不限制</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>信心門檻（confidence）≥</label>
+              <select id="confMin">
+                <option value="0">不限制</option>
+                <option value="0.6">0.60</option>
+                <option value="0.7" selected>0.70</option>
+                <option value="0.8">0.80</option>
+                <option value="0.9">0.90</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>排序</label>
+              <select id="quickSort">
+                <option value="published_at_desc" selected>最新發布</option>
+                <option value="impact_desc">影響最高</option>
+                <option value="confidence_desc">信心最高</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="hint">
+            小技巧：點表格欄位標題可排序；點「詳細」可看到 CRM 客戶/潛客名單與建議行動。<br/>
+            Prototype 使用 <span class="badge">mockEvents</span>；後續只要把資料改成 API 回來的 JSON 即可上線前端。
+          </div>
+        </div>
+      </section>
+
+      <!-- KPIs -->
+      <section class="card">
+        <header>
+          <h2>快速概覽 <span class="badge-soft">kpis</span></h2>
+        </header>
+        <div class="card-body">
+          <div class="kpis">
+            <div class="kpi">
+              <div class="label">符合條件事件數</div>
+              <div class="value" id="kpiCount">-</div>
+              <div class="subv"><span class="spark"><i id="sparkCount"></i></span><span class="mono">filtered</span></div>
+            </div>
+            <div class="kpi">
+              <div class="label">高影響（≥4）</div>
+              <div class="value" id="kpiHigh">-</div>
+              <div class="subv"><span class="spark"><i id="sparkHigh"></i></span><span class="mono">impact</span></div>
+            </div>
+            <div class="kpi">
+              <div class="label">平均信心</div>
+              <div class="value" id="kpiConf">-</div>
+              <div class="subv"><span class="spark"><i id="sparkConf"></i></span><span class="mono">confidence</span></div>
+            </div>
+            <div class="kpi">
+              <div class="label">涉及客戶/潛客（去重）</div>
+              <div class="value" id="kpiAccounts">-</div>
+              <div class="subv"><span class="spark"><i id="sparkAcc"></i></span><span class="mono">crm</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Table -->
+    <section class="card" style="margin-top:14px;">
+      <header>
+        <h2>事件清單 <span class="badge-soft">events</span></h2>
+      </header>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table id="tbl">
+            <thead>
+            <tr>
+              <th data-key="published_at">發布時間 <span class="sort" id="sort_published_at"></span></th>
+              <th data-key="title">事件 <span class="sort" id="sort_title"></span></th>
+              <th data-key="event_type">類型 <span class="sort" id="sort_event_type"></span></th>
+              <th>公司/物料/產業</th>
+              <th data-key="impact_max">影響(上/中/下) <span class="sort" id="sort_impact_max"></span></th>
+              <th data-key="confidence">信心 <span class="sort" id="sort_confidence"></span></th>
+              <th>CRM 對應</th>
+              <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- =====================
+       Page 2: Document Upload
+       ===================== -->
+  <section class="page" id="page-docs">
+    <section class="card">
+      <header>
+        <h2>文檔上傳模組 <span class="badge-soft">upload</span></h2>
+      </header>
+      <div class="card-body">
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card" style="box-shadow:none;">
+            <header><h2>上傳 & 描述 <span class="badge-soft">inputs</span></h2></header>
+            <div class="card-body">
+              <div class="filters" style="grid-template-columns:1fr;">
+                <div class="field">
+                  <label>上傳文件（Prototype：支援 .txt/.md 可讀；pdf/docx 僅顯示檔名）</label>
+                  <input id="docFile" type="file" accept=".txt,.md,.pdf,.doc,.docx" />
+                </div>
+                <div class="field">
+                  <label>補充說明（可貼事件/內容摘要，提升分析準確度）</label>
+                  <textarea id="docNotes" placeholder="例如：供應商停工、原料短缺、法規變動、客戶交期延誤…"></textarea>
+                </div>
+                <div class="field">
+                  <label>目標產業（可選）</label>
+                  <select id="docIndustry">
+                    <option value="">不指定</option>
+                    <option>半導體</option>
+                    <option>電子製造</option>
+                    <option>汽車</option>
+                    <option>化工</option>
+                    <option>機械</option>
+                    <option>電動車</option>
+                    <option>消費電子</option>
+                    <option>能源/電力</option>
+                    <option>航運/物流</option>
+                  </select>
+                </div>
+                <div class="field" style="display:flex; gap:10px; align-items:center;">
+                  <button class="btn" id="btnDocAnalyze" type="button">開始分析</button>
+                  <span class="muted" id="docStatus">尚未分析</span>
+                </div>
+              </div>
+              <div class="hint">
+                後端落地時：可把檔案上傳至 API（POST /documents），由後端做 OCR/抽取，再回傳 analysis JSON。
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;">
+            <header><h2>分析輸出（6 區塊評估） <span class="badge-soft">result</span></h2></header>
+            <div class="card-body">
+              <div class="section" id="docResultEmpty">
+                <h3><span class="num">i</span>尚無結果</h3>
+                <div class="muted">請上傳文件並點「開始分析」。</div>
+              </div>
+
+              <div id="docEvalWrap" style="display:none;">
+                <div class="section" id="docEval1"></div>
+                <div style="height:10px;"></div>
+                <div class="section" id="docEval2"></div>
+                <div style="height:10px;"></div>
+                <div class="section" id="docEval3"></div>
+                <div style="height:10px;"></div>
+                <div class="section" id="docEval4"></div>
+                <div style="height:10px;"></div>
+                <div class="section" id="docEval5"></div>
+                <div style="height:10px;"></div>
+                <div class="section" id="docEval6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- =====================
+       Page 3: Supply Chain Viz + AI Evaluation
+       ===================== -->
+  <section class="page" id="page-viz">
+    <section class="card">
+      <header>
+        <h2>產業鏈視覺化 <span class="badge-soft">viz</span></h2>
+      </header>
+      <div class="card-body">
+        <div class="vizWrap">
+          <div class="vizBar">
+            <div class="field" style="min-width:260px; flex:1;">
+              <label>查詢（指定產業/客戶/供應商）</label>
+              <input id="vizQuery" placeholder="例如：半導體、XX IC 設計、BB 電池模組…" />
+            </div>
+            <div class="field" style="min-width:260px;">
+              <label>指定事件（用於 AI 評估）</label>
+              <select id="vizEventSelect"></select>
+            </div>
+            <div class="field" style="min-width:260px;">
+              <label>選取節點（客戶/產業）</label>
+              <select id="vizNodeSelect"></select>
+            </div>
+            <div class="field" style="min-width:160px;">
+              <button class="btn" id="btnVizRun" type="button" style="width:100%;">產出 AI 評估</button>
+            </div>
+          </div>
+
+          <svg class="vizCanvas" id="vizSvg" viewBox="0 0 1100 420" preserveAspectRatio="xMidYMid meet" aria-label="產業鏈圖譜"></svg>
+        </div>
+
+        <div class="hint">
+          Prototype 視覺化採用「簡易分層布局」：上游 → 中游 → 下游。後續可替換成 D3 力導向、Graph DB（Neo4j）或 GraphRAG 方案。
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <header>
+        <h2>AI 分析與評估（6 區塊） <span class="badge-soft">evaluation</span></h2>
+      </header>
+      <div class="card-body">
+        <div class="section" id="vizEvalEmpty">
+          <h3><span class="num">i</span>尚無評估</h3>
+          <div class="muted">請在上方選擇事件與節點（產業/客戶），再點「產出 AI 評估」。</div>
+        </div>
+
+        <div id="vizEvalWrap" style="display:none;">
+          <div class="section" id="vizEval1"></div>
+          <div style="height:10px;"></div>
+          <div class="section" id="vizEval2"></div>
+          <div style="height:10px;"></div>
+          <div class="section" id="vizEval3"></div>
+          <div style="height:10px;"></div>
+          <div class="section" id="vizEval4"></div>
+          <div style="height:10px;"></div>
+          <div class="section" id="vizEval5"></div>
+          <div style="height:10px;"></div>
+          <div class="section" id="vizEval6"></div>
+        </div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<!-- =====================
+     Event Detail Modal (from overview)
+     ===================== -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+  <div class="modal">
+    <header class="title-row" style="padding:14px;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <div class="badge" id="mEventId">EVT-</div>
+          <div class="badge" id="mEventType">類型</div>
+          <div class="badge" id="mPublishedAt">時間</div>
+          <div class="badge" id="mLocation">地點</div>
+        </div>
+        <div style="font-weight:900; font-size:14.5px;" id="mTitle">事件標題</div>
+        <div class="muted" style="font-size:12.5px; line-height:1.55;" id="mSummary">摘要</div>
+      </div>
+      <button class="xbtn" id="btnClose" type="button">關閉</button>
+    </header>
+
+    <div class="modal-body">
+      <div class="section">
+        <h3><span class="num">A</span>影響評估</h3>
+        <div class="kv">
+          <div class="k">上游影響</div><div id="mUp">-</div>
+          <div class="k">中游影響</div><div id="mMid">-</div>
+          <div class="k">下游影響</div><div id="mDown">-</div>
+          <div class="k">主要風險</div><div id="mRisk">-</div>
+          <div class="k">說明</div><div id="mRationale">-</div>
+          <div class="k">信心分數</div><div id="mConf">-</div>
+        </div>
+
+        <div style="height:10px;"></div>
+        <h3><span class="num">B</span>來源</h3>
+        <div class="list" id="mSources"></div>
+      </div>
+
+      <div class="section">
+        <h3><span class="num">C</span>CRM 客戶 / 潛客（Prototype）</h3>
+        <div class="list" id="mAccounts"></div>
+        <div class="hint">接真 CRM 時，把此處的 account list 改成 API 回來的資料即可。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =========================
+  // Mock Data (擴充案例：> 2 筆)
+  // =========================
+  const mockEvents = [
+    {
+      event_id: "EVT-20260110-001",
+      published_at: "2026-01-10 08:40",
+      title: "日本九州地震影響半導體供應，部分晶圓廠短暫停機",
+      summary: "地震造成電力/物流中斷，預期短期晶圓交期拉長，影響 IC 設計與下游終端備料。",
+      event_type: "天災",
+      location: "日本・九州",
+      companies: ["A 晶圓廠", "B 封測廠"],
+      materials: ["晶圓", "矽晶圓"],
+      industries: ["半導體", "電子製造"],
+      impact: { up: 5, mid: 4, down: 3, risk_type: "交期延遲", rationale: "晶圓產能短缺，交付與備料受阻", confidence: 0.86 },
+      sources: [
+        { name: "News A", url: "https://example.com/news-a" },
+        { name: "News B", url: "https://example.com/news-b" }
+      ],
+      crm_matches: [
+        { account_id:"A-1001", name:"XX IC 設計", type:"客戶", industry:"IC 設計", role:"中游", owner:"王小明", risk:"高", action:"主動關懷交期，提出備援供應/安全庫存建議", confidence:0.78,
+          systems: { erp:["SAP ECC"], bi:["Power BI"], crm:["Dynamics"] }
+        },
+        { account_id:"L-2001", name:"YY 終端品牌", type:"潛客", industry:"消費電子", role:"下游", owner:"李小華", risk:"中", action:"以風險預警切入，提供供應鏈韌性方案簡報", confidence:0.71,
+          systems: { erp:["Oracle NetSuite"], bi:["Tableau"], crm:["Salesforce"] }
+        }
+      ]
+    },
+    {
+      event_id: "EVT-20260109-004",
+      published_at: "2026-01-09 12:30",
+      title: "北美暴風雪造成高速公路封閉，物流配送延遲擴大",
+      summary: "極端天候導致運輸中斷，倉儲周轉下降，短期內可能出現缺料與交付延遲。",
+      event_type: "天災",
+      location: "北美",
+      companies: ["物流商 G", "倉儲 H"],
+      materials: ["零組件", "包材"],
+      industries: ["航運/物流", "消費電子"],
+      impact: { up: 3, mid: 4, down: 3, risk_type: "配送延遲", rationale: "運輸路線受阻導致在途庫存與交付風險上升", confidence: 0.76 },
+      sources: [{ name:"Logistics Brief", url:"https://example.com/logi" }],
+      crm_matches: [
+        { account_id:"A-1402", name:"MM 3C 通路", type:"客戶", industry:"零售/通路", role:"下游", owner:"張雅雯", risk:"中", action:"建議調整到貨預測與補貨策略，建立缺貨預警儀表板", confidence:0.72,
+          systems: { erp:["SAP S/4HANA"], bi:["Power BI"], crm:["Dynamics"] }
+        }
+      ]
+    },
+    {
+      event_id: "EVT-20260108-003",
+      published_at: "2026-01-08 18:10",
+      title: "某港口罷工升溫，航運延誤擴大至亞洲航線",
+      summary: "罷工導致船期延誤與倉位緊張，原物料與零組件到港時間不確定性上升。",
+      event_type: "罷工/停工",
+      location: "歐洲・主要港口",
+      companies: ["航運公司 C", "港口營運 D"],
+      materials: ["零組件", "原物料"],
+      industries: ["汽車", "機械", "電子", "航運/物流"],
+      impact: { up: 4, mid: 3, down: 2, risk_type: "物流中斷", rationale: "航運延誤造成供應鏈排程與庫存風險", confidence: 0.79 },
+      sources: [{ name:"Trade Bulletin", url:"https://example.com/trade" }],
+      crm_matches: [
+        { account_id:"A-1020", name:"ZZ 機械廠", type:"客戶", industry:"機械", role:"中游", owner:"陳大同", risk:"中", action:"建議調整到港預測，啟用替代路線與提前備料", confidence:0.74,
+          systems: { erp:["SAP S/4HANA"], bi:["SAC"], crm:["Dynamics"] }
+        }
+      ]
+    },
+    {
+      event_id: "EVT-20260107-005",
+      published_at: "2026-01-07 09:55",
+      title: "中東地緣政治升溫，能源價格波動推升化工原料成本",
+      summary: "油價波動導致上游化工原料成本上升，可能造成報價調整與毛利壓力。",
+      event_type: "地緣政治",
+      location: "中東",
+      companies: ["能源供應商", "化工原料商"],
+      materials: ["溶劑", "樹脂", "化學添加劑"],
+      industries: ["化工", "電子材料"],
+      impact: { up: 4, mid: 4, down: 2, risk_type: "成本上升", rationale: "原料成本上升傳導至報價與製造成本，影響毛利與接單", confidence: 0.75 },
+      sources: [{ name:"Energy Watch", url:"https://example.com/energy" }],
+      crm_matches: [
+        { account_id:"A-1555", name:"PP 化工材料", type:"客戶", industry:"化工", role:"上游", owner:"許子涵", risk:"中", action:"建議建立原料成本看板與報價情境模擬，提前溝通調價機制", confidence:0.70,
+          systems: { erp:["Oracle ERP"], bi:["Power BI"], crm:["Salesforce"] }
+        }
+      ]
+    },
+    {
+      event_id: "EVT-20260105-002",
+      published_at: "2026-01-05 09:05",
+      title: "新法規上路：特定化學品出口管制擴大",
+      summary: "出口審查流程變嚴，可能影響相關原料供應，建議盤點替代料與供應商。",
+      event_type: "政策/法規",
+      location: "美國",
+      companies: ["主管機關"],
+      materials: ["特殊化學品"],
+      industries: ["化工", "電子材料"],
+      impact: { up: 3, mid: 4, down: 3, risk_type: "供應受限", rationale: "出口審查延長造成採購週期拉長", confidence: 0.72 },
+      sources: [{ name:"Gov Notice", url:"https://example.com/gov" }],
+      crm_matches: [
+        { account_id:"L-2222", name:"AA 電子材料", type:"潛客", industry:"電子材料", role:"上游", owner:"林怡君", risk:"中", action:"提供法規解讀與替代料評估服務，切入合規/供應韌性需求", confidence:0.69,
+          systems: { erp:["自建 ERP"], bi:["Power BI"], crm:["Zoho"] }
+        }
+      ]
+    },
+    {
+      event_id: "EVT-20251228-007",
+      published_at: "2025-12-28 13:20",
+      title: "某品牌產品召回：電池過熱風險引發供應鏈稽核",
+      summary: "召回事件可能擴及上游電芯/模組供應商，短期內增加品質稽核與替換需求。",
+      event_type: "召回/品質",
+      location: "全球",
+      companies: ["品牌 E", "電池供應 F"],
+      materials: ["電池", "電芯"],
+      industries: ["電動車", "消費電子"],
+      impact: { up: 4, mid: 4, down: 5, risk_type: "品質/召回", rationale: "下游召回壓力回傳供應鏈，可能導致供應商替換", confidence: 0.83 },
+      sources: [{ name:"Recall Report", url:"https://example.com/recall" }],
+      crm_matches: [
+        { account_id:"A-1888", name:"BB 電池模組", type:"客戶", industry:"電池", role:"中游", owner:"周雅婷", risk:"高", action:"協助建立追溯與品質儀表板，提出風險改善方案", confidence:0.81,
+          systems: { erp:["SAP ECC"], bi:["SAC"], crm:["Salesforce"] }
+        },
+        { account_id:"A-1999", name:"CC 車用電子", type:"客戶", industry:"車用電子", role:"下游", owner:"劉致遠", risk:"中", action:"提供召回影響分析與交付風險預警", confidence:0.73,
+          systems: { erp:["SAP S/4HANA"], bi:["Power BI"], crm:["Dynamics"] }
+        }
+      ]
+    }
+  ];
+
+  // =========================
+  // Utils
+  // =========================
+  const el = (id) => document.getElementById(id);
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+  function safeBind(id, event, handler){
+    const node = el(id);
+    if (!node) { console.warn("[bind missing]", id); return; }
+    node.addEventListener(event, handler);
+  }
+
+  function parseTime(s){
+    return new Date(s.replace(" ", "T") + ":00");
+  }
+
+  function maxImpact(e){
+    return Math.max(e.impact.up, e.impact.mid, e.impact.down);
+  }
+
+  function dominantLevel(e){
+    const m = maxImpact(e);
+    if (e.impact.up === m) return "up";
+    if (e.impact.mid === m) return "mid";
+    return "down";
+  }
+
+  function pillByScore(score){
+    if (score >= 4) return "danger";
+    if (score >= 3) return "warn";
+    return "ok";
+  }
+
+  function renderBar(val, max=1){
+    const pct = clamp((val/max)*100, 0, 100);
+    return `<span class="bar" aria-hidden="true"><i style="width:${pct}%;"></i></span>`;
+  }
+
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // =========================
+  // Tabs / Pages
+  // =========================
+  function setActiveTab(pageKey){
+    document.querySelectorAll('.tab').forEach(btn => {
+      const active = btn.dataset.page === pageKey;
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.toggle('active', p.id === `page-${pageKey}`);
+    });
+
+    const exportBtn = el('btnExport');
+    if (exportBtn) exportBtn.disabled = (pageKey !== 'overview');
+  }
+
+  function bindTabs(){
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => setActiveTab(btn.dataset.page));
+    });
+  }
+
+  // =========================
+  // Overview State & Render
+  // =========================
+  const state = {
+    q: "",
+    eventType: "",
+    chainLevel: "",
+    impactMin: 3,
+    confMin: 0.7,
+    sortKey: "published_at",
+    sortDir: "desc"
+  };
+
+  function applyFilters(events){
+    const q = state.q.trim().toLowerCase();
+    const et = state.eventType;
+    const lvl = state.chainLevel;
+    const impactMin = Number(state.impactMin);
+    const confMin = Number(state.confMin);
+
+    return events.filter(e => {
+      if (et && e.event_type !== et) return false;
+      if (lvl && dominantLevel(e) !== lvl) return false;
+      if (maxImpact(e) < impactMin) return false;
+      if (e.impact.confidence < confMin) return false;
+
+      if (!q) return true;
+
+      const bag = [
+        e.title, e.summary, e.location,
+        ...(e.companies||[]), ...(e.materials||[]), ...(e.industries||[]),
+        ...(e.crm_matches||[]).map(a => `${a.name} ${a.industry} ${a.owner} ${a.action}`)
+      ].join(" | ").toLowerCase();
+
+      return bag.includes(q);
+    });
+  }
+
+  function sortEvents(events){
+    const key = state.sortKey;
+    const dir = state.sortDir === "asc" ? 1 : -1;
+
+    return [...events].sort((a,b) => {
+      if (key === "published_at") return (parseTime(a.published_at) - parseTime(b.published_at)) * dir;
+      if (key === "title") return a.title.localeCompare(b.title, "zh-Hant") * dir;
+      if (key === "event_type") return a.event_type.localeCompare(b.event_type, "zh-Hant") * dir;
+      if (key === "impact_max") return (maxImpact(a) - maxImpact(b)) * dir;
+      if (key === "confidence") return (a.impact.confidence - b.impact.confidence) * dir;
+      return 0;
+    });
+  }
+
+  function setSpark(id, v, max){
+    const node = el(id);
+    if (!node) return;
+    const pct = clamp((v/max)*100, 0, 100);
+    node.style.width = pct + "%";
+  }
+
+  function renderKPIs(events){
+    el("kpiCount").textContent = events.length;
+
+    const high = events.filter(e => maxImpact(e) >= 4).length;
+    el("kpiHigh").textContent = high;
+
+    const avgConf = events.length ? (events.reduce((s,e)=>s+e.impact.confidence,0)/events.length) : 0;
+    el("kpiConf").textContent = avgConf.toFixed(2);
+
+    const accounts = new Set();
+    events.forEach(e => (e.crm_matches||[]).forEach(a => accounts.add(a.account_id)));
+    el("kpiAccounts").textContent = accounts.size;
+
+    setSpark("sparkCount", events.length, mockEvents.length || 1);
+    setSpark("sparkHigh", high, Math.max(1, events.length));
+    setSpark("sparkConf", avgConf, 1);
+    setSpark("sparkAcc", accounts.size, 16);
+  }
+
+  function chips(arr, cls=""){
+    return (arr||[]).slice(0,4).map(x => `<span class="chip ${cls}">${escapeHtml(x)}</span>`).join("");
+  }
+
+  function primaryAccountHint(e){
+    const list = e.crm_matches || [];
+    if (!list.length) return "無對應";
+    const top = list[0];
+    return `${top.type}：${top.name}（${top.owner}）`;
+  }
+
+  function renderSortIndicators(){
+    const ids = ["published_at","title","event_type","impact_max","confidence"];
+    ids.forEach(k => {
+      const span = el("sort_"+k);
+      if (!span) return;
+      if (state.sortKey !== k) { span.textContent = ""; return; }
+      span.textContent = state.sortDir === "asc" ? "↑" : "↓";
+    });
+  }
+
+  function renderTable(events){
+    const tbody = el("tbody");
+    tbody.innerHTML = "";
+
+    events.forEach(e => {
+      const dom = dominantLevel(e);
+      const impactMax = maxImpact(e);
+      const crmCount = (e.crm_matches||[]).length;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="nowrap">${escapeHtml(e.published_at)}</td>
+        <td>
+          <div style="font-weight:850; margin-bottom:6px;">${escapeHtml(e.title)}</div>
+          <div class="muted" style="font-size:11.8px; line-height:1.55; max-width:520px;">
+            ${escapeHtml(e.summary).slice(0,120)}${e.summary.length>120?"…":""}
+          </div>
+        </td>
+        <td><span class="chip type">${escapeHtml(e.event_type)}</span></td>
+        <td>
+          <div class="chips" style="margin-bottom:6px;">${chips(e.companies)}</div>
+          <div class="chips" style="margin-bottom:6px;">${chips(e.materials)}</div>
+          <div class="chips">${chips(e.industries)}</div>
+        </td>
+        <td>
+          <div class="pill ${pillByScore(impactMax)}">max:${impactMax} · dom:${dom}</div>
+          <div style="height:6px;"></div>
+          <div class="score">U ${e.impact.up} / M ${e.impact.mid} / D ${e.impact.down}</div>
+        </td>
+        <td>
+          <div class="score">${(e.impact.confidence).toFixed(2)} ${renderBar(e.impact.confidence, 1)}</div>
+        </td>
+        <td>
+          <div class="score">${crmCount} ${renderBar(Math.min(crmCount, 6), 6)}</div>
+          <div class="muted" style="font-size:11.8px; margin-top:6px;">${escapeHtml(primaryAccountHint(e))}</div>
+        </td>
+        <td>
+          <div class="actions">
+            <span class="link" data-action="detail" data-id="${escapeHtml(e.event_id)}">詳細</span>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('[data-action="detail"]').forEach(a => {
+      a.addEventListener("click", () => openModal(a.dataset.id));
+    });
+  }
+
+  function updateOverview(){
+    let data = applyFilters(mockEvents);
+
+    const qs = el("quickSort").value;
+    if (qs === "published_at_desc"){ state.sortKey="published_at"; state.sortDir="desc"; }
+    if (qs === "impact_desc"){ state.sortKey="impact_max"; state.sortDir="desc"; }
+    if (qs === "confidence_desc"){ state.sortKey="confidence"; state.sortDir="desc"; }
+
+    data = sortEvents(data);
+    renderKPIs(data);
+    renderSortIndicators();
+    renderTable(data);
+  }
+
+  // =========================
+  // Modal
+  // =========================
+  function openModal(eventId){
+    const e = mockEvents.find(x => x.event_id === eventId);
+    if (!e) return;
+
+    el("mEventId").textContent = e.event_id;
+    el("mEventType").textContent = e.event_type;
+    el("mPublishedAt").textContent = e.published_at;
+    el("mLocation").textContent = e.location;
+
+    el("mTitle").textContent = e.title;
+    el("mSummary").textContent = e.summary;
+
+    el("mUp").innerHTML = `<span class="pill ${pillByScore(e.impact.up)}">${e.impact.up}</span>`;
+    el("mMid").innerHTML = `<span class="pill ${pillByScore(e.impact.mid)}">${e.impact.mid}</span>`;
+    el("mDown").innerHTML = `<span class="pill ${pillByScore(e.impact.down)}">${e.impact.down}</span>`;
+    el("mRisk").textContent = e.impact.risk_type;
+    el("mRationale").textContent = e.impact.rationale;
+    el("mConf").innerHTML = `${e.impact.confidence.toFixed(2)} ${renderBar(e.impact.confidence,1)}`;
+
+    const sWrap = el("mSources");
+    sWrap.innerHTML = "";
+    (e.sources||[]).forEach(s => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${escapeHtml(s.name)}</div>
+            <div class="meta">${escapeHtml(s.url)}</div>
+          </div>
+          <span class="badge">source</span>
+        </div>
+      `;
+      sWrap.appendChild(div);
+    });
+    if (!(e.sources||[]).length){
+      sWrap.innerHTML = `<div class="muted">（無來源）</div>`;
+    }
+
+    const aWrap = el("mAccounts");
+    aWrap.innerHTML = "";
+    (e.crm_matches||[]).forEach(a => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${escapeHtml(a.name)} <span class="badge">${escapeHtml(a.type)}</span></div>
+            <div class="meta">${escapeHtml(a.industry)} · ${escapeHtml(a.role)} · Owner: ${escapeHtml(a.owner)}</div>
+          </div>
+          <span class="badge">risk:${escapeHtml(a.risk)}</span>
+        </div>
+        <div style="margin-top:8px; font-size:12.5px; line-height:1.6;">
+          <div class="muted" style="margin-bottom:4px;">建議行動</div>
+          ${escapeHtml(a.action)}
+        </div>
+        <div class="muted" style="margin-top:8px; font-family:var(--mono);">
+          match_conf: ${Number(a.confidence).toFixed(2)}
+        </div>
+      `;
+      aWrap.appendChild(div);
+    });
+    if (!(e.crm_matches||[]).length){
+      aWrap.innerHTML = `<div class="muted">（無對應客戶/潛客）</div>`;
+    }
+
+    el("modalBackdrop").style.display = "flex";
+  }
+
+  function closeModal(){
+    el("modalBackdrop").style.display = "none";
+  }
+
+  // =========================
+  // CSV Export (Overview)
+  // =========================
+  function exportCSV(rows){
+    const headers = [
+      "event_id","published_at","title","event_type","location",
+      "companies","materials","industries",
+      "impact_up","impact_mid","impact_down","impact_max","risk_type","confidence",
+      "crm_match_count"
+    ];
+
+    const lines = [headers.join(",")];
+    rows.forEach(e => {
+      const line = [
+        e.event_id,
+        e.published_at,
+        e.title,
+        e.event_type,
+        e.location,
+        (e.companies||[]).join("|"),
+        (e.materials||[]).join("|"),
+        (e.industries||[]).join("|"),
+        e.impact.up,
+        e.impact.mid,
+        e.impact.down,
+        maxImpact(e),
+        e.impact.risk_type,
+        e.impact.confidence,
+        (e.crm_matches||[]).length
+      ].map(v => `"${String(v).replaceAll('"','""')}"`).join(",");
+      lines.push(line);
+    });
+
+    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `supplychain_events_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // =========================
+  // Document Upload Analysis (Prototype)
+  // =========================
+  let docTextCache = "";
+
+  async function readTxtFile(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = reject;
+      reader.readAsText(file, "utf-8");
+    });
+  }
+
+  function heuristicFromText(text){
+    const t = (text || "").toLowerCase();
+    return {
+      disaster: t.includes("地震") || t.includes("洪水") || t.includes("天災") || t.includes("暴風雪") || t.includes("earthquake") || t.includes("storm"),
+      strike: t.includes("罷工") || t.includes("停工") || t.includes("strike"),
+      policy: t.includes("法規") || t.includes("出口") || t.includes("管制") || t.includes("sanction") || t.includes("regulation"),
+      recall: t.includes("召回") || t.includes("過熱") || t.includes("品質") || t.includes("recall"),
+      energy: t.includes("油價") || t.includes("能源") || t.includes("電價") || t.includes("energy") || t.includes("oil"),
+      logistics: t.includes("港口") || t.includes("航運") || t.includes("物流") || t.includes("shipping") || t.includes("port"),
+    };
+  }
+
+  function scoreFromFlags(flags){
+    let up = 3, mid = 3, down = 3, conf = 0.72;
+    let risk = "供應不確定性";
+    let rationale = "文件內容顯示供應鏈供給/交付存在不確定性，需做情境推演與備援。";
+
+    if (flags.disaster){
+      up = 5; mid = 4; down = 3; conf = 0.82; risk = "交期延遲/產能受限";
+      rationale = "天災常造成產能/物流中斷，影響上游供應與中游排程。";
+    }
+    if (flags.logistics){
+      up = Math.max(up,4); mid = Math.max(mid,3); down = Math.max(down,2);
+      conf = Math.max(conf,0.78); risk = "物流/作業中斷";
+      rationale = "物流節點阻塞造成在途庫存、交付與排程風險。";
+    }
+    if (flags.strike){
+      up = Math.max(up,4); mid = Math.max(mid,3); down = Math.max(down,2);
+      conf = Math.max(conf,0.78); risk = "罷工/停工造成供應中斷";
+      rationale = "罷工/停工會使供應鏈節點停擺，交付時程不確定性上升。";
+    }
+    if (flags.policy){
+      up = Math.max(up,3); mid = Math.max(mid,4); down = Math.max(down,3);
+      conf = Math.max(conf,0.74); risk = "供應受限/合規風險";
+      rationale = "法規/管制延長採購週期，需調整合規與替代料策略。";
+    }
+    if (flags.recall){
+      up = Math.max(up,4); mid = Math.max(mid,4); down = Math.max(down,5);
+      conf = Math.max(conf,0.80); risk = "品質/召回";
+      rationale = "召回壓力回傳至供應鏈，增加稽核、替換與聲譽風險。";
+    }
+    if (flags.energy){
+      up = Math.max(up,4); mid = Math.max(mid,4); down = Math.max(down,2);
+      conf = Math.max(conf,0.74); risk = "成本波動";
+      rationale = "能源/油價波動推升上游成本，可能擴散到報價與毛利。";
+    }
+    return {up, mid, down, conf, risk, rationale};
+  }
+
+  function pickCustomersByIndustry(industry){
+    const out = [];
+    mockEvents.forEach(ev => {
+      (ev.crm_matches||[]).forEach(a => {
+        const ok = !industry
+          || (ev.industries || []).includes(industry)
+          || (a.industry || "").includes(industry);
+        if (ok) out.push(a);
+      });
+    });
+    const map = new Map();
+    out.forEach(a => map.set(a.account_id, a));
+    return [...map.values()].slice(0, 10);
+  }
+
+  function renderEvaluationBlocks(prefix, context){
+    const { eventTitle, nodeName, nodeType, industry, impact, customers } = context;
+
+    const sev = Math.max(impact.up, impact.mid, impact.down);
+    const sevLabel = sev >= 4 ? "高" : sev >= 3 ? "中" : "低";
+    const sevPill = `<span class="pill ${pillByScore(sev)}">影響程度：${sevLabel}（max:${sev}）</span>`;
+
+    const blocks = [
+      {
+        id: prefix + "1",
+        title: "說明影響程度",
+        body: `
+          <div class="muted" style="margin-bottom:8px;">事件：<b>${escapeHtml(eventTitle)}</b>｜目標：<b>${escapeHtml(nodeName)}</b>（${escapeHtml(nodeType)}）</div>
+          ${sevPill}
+          <div style="height:8px;"></div>
+          <div class="kv">
+            <div class="k">上游</div><div><span class="pill ${pillByScore(impact.up)}">${impact.up}</span></div>
+            <div class="k">中游</div><div><span class="pill ${pillByScore(impact.mid)}">${impact.mid}</span></div>
+            <div class="k">下游</div><div><span class="pill ${pillByScore(impact.down)}">${impact.down}</span></div>
+            <div class="k">主要風險</div><div>${escapeHtml(impact.risk)}</div>
+            <div class="k">判斷依據</div><div>${escapeHtml(impact.rationale)}</div>
+            <div class="k">信心分數</div><div class="score">${impact.conf.toFixed(2)} ${renderBar(impact.conf, 1)}</div>
+          </div>
+        `
+      },
+      {
+        id: prefix + "2",
+        title: "相關因應措施",
+        body: `
+          <div class="muted" style="margin-bottom:8px;">建議以「短期止血 / 中期韌性 / 長期治理」三層措施規劃。</div>
+          <div class="list">
+            <div class="item">
+              <div class="name">短期（0-2 週）：控風險、保交付</div>
+              <div class="meta">啟動備援供應商/替代料、調整交期預測、建立關鍵料件看板與每日追蹤機制。</div>
+            </div>
+            <div class="item">
+              <div class="name">中期（1-2 月）：提升韌性</div>
+              <div class="meta">安全庫存策略（依客戶/料件 ABC 分級）、多來源採購、跨工廠產能調度與物流路線備援。</div>
+            </div>
+            <div class="item">
+              <div class="name">長期（3-6 月）：治理與自動化</div>
+              <div class="meta">建立供應鏈事件知識庫、風險評分模型、S&OP/APS 連動、供應商績效與合規監控。</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: prefix + "3",
+        title: "目標客戶及其上下游廠商的影響",
+        body: `
+          <div class="muted" style="margin-bottom:8px;">以下為 Prototype 範例輸出：實務上由「產業鏈圖譜 + CRM/主數據」補齊上下游清單。</div>
+          <div class="list">
+            ${(customers || []).slice(0, 8).map(c => `
+              <div class="item">
+                <div class="top">
+                  <div>
+                    <div class="name">${escapeHtml(c.name)} <span class="badge">${escapeHtml(c.type)}</span></div>
+                    <div class="meta">${escapeHtml(c.industry)} · 角色：${escapeHtml(c.role)} · Owner: ${escapeHtml(c.owner)}</div>
+                  </div>
+                  <span class="badge">risk:${escapeHtml(c.risk)}</span>
+                </div>
+                <div style="margin-top:8px;">
+                  <div class="muted" style="margin-bottom:4px;">影響摘要</div>
+                  <div style="font-size:12.5px; line-height:1.6;">
+                    可能面臨 <b>${escapeHtml(impact.risk)}</b>，建議同步評估其上游供應商/下游客戶之交付與庫存壓力，優先處理高營收/高關鍵料件組合。
+                  </div>
+                </div>
+              </div>
+            `).join("") || `<div class="muted">（未找到對應客戶清單，建議以 CRM/潛客池補齊。）</div>`}
+          </div>
+        `
+      },
+      {
+        id: prefix + "4",
+        title: "目標客戶其 ERP、BI 等系統工具的導入及優化策略",
+        body: `
+          <div class="muted" style="margin-bottom:8px;">以「可視化 + 預警 + 自動化」為核心，優先落地可衡量的流程改進。</div>
+          <div class="list">
+            <div class="item">
+              <div class="name">ERP（交期/採購/庫存）</div>
+              <div class="meta">建立關鍵料件主檔（Lead time、替代料、合規屬性）與採購策略；強化 MRP 參數與例外報表。</div>
+            </div>
+            <div class="item">
+              <div class="name">BI（風險看板）</div>
+              <div class="meta">事件→料件→供應商→客戶的追蹤儀表板；加入「影響分數、信心分數、交期偏差、缺料預警」。</div>
+            </div>
+            <div class="item">
+              <div class="name">整合（API/資料倉儲/治理）</div>
+              <div class="meta">整合 CRM/ERP/WMS/MES；集中到資料倉儲/語義層；加上資料品質規則與稽核欄位。</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: prefix + "5",
+        title: "客戶相關產業機會開發",
+        body: `
+          <div class="muted" style="margin-bottom:8px;">把「風險」轉成「商機」：韌性、可視化、合規、效率是常見切入點。</div>
+          <div class="list">
+            <div class="item">
+              <div class="name">供應鏈韌性方案</div>
+              <div class="meta">安全庫存與多來源策略設計、供應商評等、替代料導入流程、風險預警。</div>
+            </div>
+            <div class="item">
+              <div class="name">數據平台/BI 導入</div>
+              <div class="meta">事件知識庫 + 供應鏈圖譜 + 儀表板，支援跨部門決策（採購/業務/生管/風控）。</div>
+            </div>
+            <div class="item">
+              <div class="name">流程自動化與 AI 應用</div>
+              <div class="meta">自動彙整新聞/公告、事件分類、影響推論、客戶清單與建議話術；降低人工整理成本。</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: prefix + "6",
+        title: "對客戶的綜合策略建議",
+        body: `
+          <div class="muted" style="margin-bottom:8px;">綜合建議會同時考量：影響程度、客戶價值、落地成本、可量化成效。</div>
+          <div class="item">
+            <div class="name">策略路線圖（示例）</div>
+            <div style="margin-top:8px; font-size:12.5px; line-height:1.65;">
+              1) 先對高影響客戶建立「事件→料件→交期」追蹤清單（1-2 週）；<br/>
+              2) 以 BI 看板提供跨部門共識（1 個月）；<br/>
+              3) 導入供應商評等/替代料治理與自動預警（2-3 個月）；<br/>
+              4) 最後以 AI 助理半自動產出週報/客戶應對策略（3-6 個月）。
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    blocks.forEach(b => {
+      const box = document.getElementById(b.id);
+      if (!box) return;
+      box.innerHTML = `
+        <h3><span class="num">${escapeHtml(b.title.split("")[0])}</span>${escapeHtml(b.title)}</h3>
+        ${b.body}
+      `;
+    });
+  }
+
+  function setDocStatus(text){
+    const s = el("docStatus");
+    if (s) s.textContent = text;
+  }
+
+  async function runDocAnalysis(){
+    const file = el("docFile").files && el("docFile").files[0];
+    const notes = el("docNotes").value || "";
+    const industry = el("docIndustry").value || "";
+
+    if (!file && !notes.trim()){
+      setDocStatus("請先上傳文件或輸入補充說明");
+      return;
+    }
+
+    setDocStatus("分析中…（Prototype）");
+
+    let extracted = "";
+    if (file){
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      if (ext === "txt" || ext === "md"){
+        extracted = await readTxtFile(file);
+      } else {
+        extracted = `（Prototype）已收到檔案：${file.name}，此版本不解析 pdf/doc/docx。請改用後端 OCR/抽取。`;
+      }
+    }
+    docTextCache = [extracted, notes].filter(Boolean).join("\n\n");
+
+    const flags = heuristicFromText(docTextCache);
+    const s = scoreFromFlags(flags);
+
+    const impact = { up:s.up, mid:s.mid, down:s.down, conf:s.conf, risk:s.risk, rationale:s.rationale };
+    const eventTitle = file ? `文件事件：${file.name}` : "文件事件：使用者輸入內容";
+    const nodeName = industry || "未指定（以文件內容推估）";
+    const nodeType = industry ? "產業" : "文件主題";
+    const customers = pickCustomersByIndustry(industry);
+
+    el("docResultEmpty").style.display = "none";
+    el("docEvalWrap").style.display = "block";
+    setDocStatus("已完成分析");
+
+    renderEvaluationBlocks(
+      "docEval",
+      { eventTitle, nodeName, nodeType, industry, impact, customers }
+    );
+  }
+
+  // =========================
+  // Supply Chain Visualization (Prototype)
+  // =========================
+  const graph = {
+    nodes: [
+      { id:"ind-semi",  label:"半導體", type:"Industry", level:"mid" },
+      { id:"sup-wafer", label:"晶圓供應", type:"Supplier", level:"up" },
+      { id:"sup-pack",  label:"封測供應", type:"Supplier", level:"up" },
+
+      { id:"cus-ic",    label:"XX IC 設計", type:"Customer", level:"mid" },
+      { id:"cus-batt",  label:"BB 電池模組", type:"Customer", level:"mid" },
+      { id:"cus-mech",  label:"ZZ 機械廠", type:"Customer", level:"mid" },
+      { id:"cus-autoel",label:"CC 車用電子", type:"Customer", level:"down" },
+      { id:"cus-brand", label:"YY 終端品牌", type:"Customer", level:"down" },
+
+      { id:"ind-ev",    label:"電動車", type:"Industry", level:"down" },
+      { id:"sup-chem",  label:"化工原料", type:"Supplier", level:"up" },
+      { id:"cus-chem",  label:"PP 化工材料", type:"Customer", level:"up" },
+
+      { id:"ind-log",   label:"航運/物流", type:"Industry", level:"mid" },
+      { id:"sup-ship",  label:"航運運力", type:"Supplier", level:"up" },
+      { id:"cus-retail",label:"MM 3C 通路", type:"Customer", level:"down" }
+    ],
+    edges: [
+      { from:"sup-wafer", to:"ind-semi", label:"供應" },
+      { from:"sup-pack",  to:"ind-semi", label:"供應" },
+      { from:"ind-semi",  to:"cus-ic",   label:"交付" },
+      { from:"cus-ic",    to:"cus-brand",label:"出貨" },
+
+      { from:"sup-chem",  to:"cus-chem", label:"原料" },
+      { from:"cus-chem",  to:"cus-batt", label:"材料" },
+      { from:"cus-batt",  to:"ind-ev",   label:"模組" },
+      { from:"ind-ev",    to:"cus-autoel", label:"需求" },
+      { from:"cus-autoel",to:"cus-brand",label:"整機" },
+
+      { from:"ind-semi",  to:"cus-mech", label:"設備/零件" },
+
+      { from:"sup-ship",  to:"ind-log",  label:"運力" },
+      { from:"ind-log",   to:"cus-retail", label:"配送" }
+    ]
+  };
+
+  function levelX(level){
+    if (level === "up") return 210;
+    if (level === "mid") return 550;
+    return 890;
+  }
+
+  function layoutGraph(){
+    const groups = { up:[], mid:[], down:[] };
+    graph.nodes.forEach(n => groups[n.level].push(n));
+
+    Object.keys(groups).forEach(level => {
+      const arr = groups[level];
+      const gap = 420 / (arr.length + 1);
+      arr.forEach((n, i) => {
+        n.x = levelX(level);
+        n.y = gap * (i + 1);
+      });
+    });
+  }
+
+  function renderGraphSvg(highlightIds = new Set()){
+    const svg = el("vizSvg");
+    svg.innerHTML = "";
+
+    const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
+    defs.innerHTML = `
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L9,3 L0,6 Z" fill="rgba(37,99,235,.35)"></path>
+      </marker>
+    `;
+    svg.appendChild(defs);
+
+    graph.edges.forEach(e => {
+      const a = graph.nodes.find(n => n.id === e.from);
+      const b = graph.nodes.find(n => n.id === e.to);
+      if (!a || !b) return;
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+      line.setAttribute("x1", a.x);
+      line.setAttribute("y1", a.y);
+      line.setAttribute("x2", b.x);
+      line.setAttribute("y2", b.y);
+      line.setAttribute("class", "edge");
+      line.setAttribute("marker-end", "url(#arrow)");
+      svg.appendChild(line);
+
+      const lx = (a.x + b.x)/2;
+      const ly = (a.y + b.y)/2 - 6;
+      const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+      label.setAttribute("x", lx);
+      label.setAttribute("y", ly);
+      label.setAttribute("text-anchor","middle");
+      label.setAttribute("class","edgeLabel");
+      label.textContent = e.label;
+      svg.appendChild(label);
+    });
+
+    graph.nodes.forEach(n => {
+      const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+      g.setAttribute("class","node");
+      g.setAttribute("data-id", n.id);
+      g.setAttribute("transform", `translate(${n.x},${n.y})`);
+
+      const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      circle.setAttribute("r", 26);
+      circle.setAttribute("class", "nodeCircle" + (highlightIds.has(n.id) ? " hl" : ""));
+      g.appendChild(circle);
+
+      const t1 = document.createElementNS("http://www.w3.org/2000/svg","text");
+      t1.setAttribute("text-anchor","middle");
+      t1.setAttribute("y", -2);
+      t1.textContent = n.label.length > 10 ? n.label.slice(0,10) + "…" : n.label;
+      g.appendChild(t1);
+
+      const t2 = document.createElementNS("http://www.w3.org/2000/svg","text");
+      t2.setAttribute("text-anchor","middle");
+      t2.setAttribute("y", 15);
+      t2.setAttribute("class","sub");
+      t2.textContent = n.type;
+      g.appendChild(t2);
+
+      g.addEventListener("click", () => {
+        el("vizNodeSelect").value = n.id;
+        el("vizQuery").value = n.label;
+        highlightQuery(n.label);
+      });
+
+      svg.appendChild(g);
+    });
+  }
+
+  function populateVizSelectors(){
+    const eSel = el("vizEventSelect");
+    eSel.innerHTML = "";
+    mockEvents.forEach(ev => {
+      const opt = document.createElement("option");
+      opt.value = ev.event_id;
+      opt.textContent = `${ev.published_at}｜${ev.title.slice(0, 24)}${ev.title.length>24?"…":""}`;
+      eSel.appendChild(opt);
+    });
+
+    const nSel = el("vizNodeSelect");
+    nSel.innerHTML = "";
+    graph.nodes.forEach(n => {
+      const opt = document.createElement("option");
+      opt.value = n.id;
+      opt.textContent = `${n.label}（${n.level}｜${n.type}）`;
+      nSel.appendChild(opt);
+    });
+
+    if (mockEvents[0]) eSel.value = mockEvents[0].event_id;
+    if (graph.nodes[0]) nSel.value = graph.nodes[0].id;
+  }
+
+  function highlightQuery(q){
+    const query = (q || el("vizQuery").value || "").trim().toLowerCase();
+    if (!query){
+      renderGraphSvg(new Set());
+      return;
+    }
+
+    const hit = new Set();
+    graph.nodes.forEach(n => {
+      if ((n.label || "").toLowerCase().includes(query)) hit.add(n.id);
+    });
+
+    const neighbors = new Set([...hit]);
+    graph.edges.forEach(e => {
+      if (hit.has(e.from) || hit.has(e.to)){
+        neighbors.add(e.from); neighbors.add(e.to);
+      }
+    });
+
+    renderGraphSvg(neighbors);
+
+    const exact = graph.nodes.find(n => (n.label || "").toLowerCase() === query);
+    if (exact) el("vizNodeSelect").value = exact.id;
+  }
+
+  function findCustomersRelatedToNode(node){
+    const label = (node?.label || "").toLowerCase();
+    const all = [];
+
+    mockEvents.forEach(ev => {
+      (ev.crm_matches||[]).forEach(a => {
+        const aName = (a.name || "").toLowerCase();
+        const aInd = (a.industry || "").toLowerCase();
+        const evInd = (ev.industries || []).map(x => String(x).toLowerCase());
+        const ok =
+          aName.includes(label) ||
+          (node.type === "Industry" && (evInd.includes(label) || aInd.includes(label))) ||
+          (node.type === "Customer" && aName.includes(label));
+        if (ok) all.push(a);
+      });
+    });
+
+    const map = new Map();
+    all.forEach(a => map.set(a.account_id, a));
+    return [...map.values()].slice(0, 10);
+  }
+
+  function deriveImpactForViz(eventObj, node){
+    const base = eventObj.impact;
+    let up = base.up, mid = base.mid, down = base.down;
+
+    if (node.level === "up"){ up = Math.min(5, up + 1); }
+    if (node.level === "mid"){ mid = Math.min(5, mid + 1); }
+    if (node.level === "down"){ down = Math.min(5, down + 1); }
+
+    const conf = clamp(base.confidence + 0.03, 0, 1);
+    return { up, mid, down, conf, risk: base.risk_type, rationale: base.rationale };
+  }
+
+  function runVizEvaluation(){
+    const eventId = el("vizEventSelect").value;
+    const nodeId = el("vizNodeSelect").value;
+
+    const ev = mockEvents.find(x => x.event_id === eventId);
+    const node = graph.nodes.find(n => n.id === nodeId);
+    if (!ev || !node) return;
+
+    const hl = new Set([node.id]);
+    graph.edges.forEach(e => {
+      if (e.from === node.id) hl.add(e.to);
+      if (e.to === node.id) hl.add(e.from);
+    });
+    renderGraphSvg(hl);
+
+    const customers = findCustomersRelatedToNode(node);
+    const impact = deriveImpactForViz(ev, node);
+
+    el("vizEvalEmpty").style.display = "none";
+    el("vizEvalWrap").style.display = "block";
+
+    renderEvaluationBlocks(
+      "vizEval",
+      {
+        eventTitle: ev.title,
+        nodeName: node.label,
+        nodeType: `${node.type}｜${node.level}`,
+        industry: node.type === "Industry" ? node.label : "",
+        impact,
+        customers
+      }
+    );
+  }
+
+  // =========================
+  // Bind UI + Init
+  // =========================
+  function bindOverview(){
+    safeBind("q","input",(e)=>{ state.q = e.target.value; updateOverview(); });
+    safeBind("eventType","change",(e)=>{ state.eventType = e.target.value; updateOverview(); });
+    safeBind("chainLevel","change",(e)=>{ state.chainLevel = e.target.value; updateOverview(); });
+    safeBind("impactMin","change",(e)=>{ state.impactMin = e.target.value; updateOverview(); });
+    safeBind("confMin","change",(e)=>{ state.confMin = e.target.value; updateOverview(); });
+    safeBind("quickSort","change",()=> updateOverview());
+
+    safeBind("btnReset","click", () => {
+      el("q").value = "";
+      el("eventType").value = "";
+      el("chainLevel").value = "";
+      el("impactMin").value = "3";
+      el("confMin").value = "0.7";
+      el("quickSort").value = "published_at_desc";
+      state.q=""; state.eventType=""; state.chainLevel=""; state.impactMin=3; state.confMin=0.7;
+      updateOverview();
+    });
+
+    safeBind("btnExport","click", () => {
+      if (el("btnExport").disabled) return;
+      const filtered = sortEvents(applyFilters(mockEvents));
+      exportCSV(filtered);
+    });
+
+    document.querySelectorAll("#tbl th[data-key]").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+        if (state.sortKey === key) state.sortDir = (state.sortDir === "asc" ? "desc" : "asc");
+        else { state.sortKey = key; state.sortDir = "desc"; }
+        updateOverview();
+      });
+    });
+
+    safeBind("btnClose","click", closeModal);
+    safeBind("modalBackdrop","click", (e) => {
+      if (e.target === el("modalBackdrop")) closeModal();
+    });
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+  }
+
+  function bindDocs(){
+    safeBind("docFile","change", async () => {
+      const file = el("docFile").files && el("docFile").files[0];
+      if (!file){
+        docTextCache = "";
+        setDocStatus("尚未分析");
+        return;
+      }
+      setDocStatus(`已選擇：${file.name}`);
+
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      if (ext === "txt" || ext === "md"){
+        try{
+          docTextCache = await readTxtFile(file);
+        }catch{}
+      }
+    });
+
+    safeBind("btnDocAnalyze","click", runDocAnalysis);
+  }
+
+  function bindViz(){
+    populateVizSelectors();
+    layoutGraph();
+    renderGraphSvg(new Set());
+
+    safeBind("vizQuery","input", () => highlightQuery());
+    safeBind("vizNodeSelect","change", () => {
+      const node = graph.nodes.find(n => n.id === el("vizNodeSelect").value);
+      if (node) {
+        el("vizQuery").value = node.label;
+        highlightQuery(node.label);
+      }
+    });
+    safeBind("btnVizRun","click", runVizEvaluation);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    bindTabs();
+    bindOverview();
+    bindDocs();
+    bindViz();
+    updateOverview();
+    setActiveTab("overview");
+  });
+</script>
+</body>
+</html>
